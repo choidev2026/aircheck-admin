@@ -1,159 +1,105 @@
-# Turborepo starter
+# aircheck-admin
 
-This Turborepo starter is maintained by the Turborepo core team.
+오늘공기 Admin Dashboard (Turborepo 모노레포)
 
-## Using this example
+## 프로젝트 구조
 
-Run the following command:
-
-```sh
-npx create-turbo@latest
+```
+aircheck-admin/
+├── apps/
+│   └── admin/              # Next.js Admin 앱
+├── packages/
+│   ├── api-client/         # API 클라이언트
+│   ├── ui/                 # 공통 UI 컴포넌트
+│   ├── eslint-config/      # ESLint 설정
+│   └── typescript-config/  # TypeScript 설정
+├── package.json            # 워크스페이스 루트
+└── turbo.json              # Turborepo 설정
 ```
 
-## What's inside?
+## 프로젝트 생성
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```bash
+npx create-turbo@latest aircheck-admin --package-manager npm
 ```
 
-Without global `turbo`, use your package manager:
+## 의존성 설치
 
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+npm install
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## 개발 서버 실행
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+```bash
+npm run dev
 ```
 
-Without global `turbo`:
+Admin 앱: http://localhost:3000
 
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+## 기술 스택
+
+| 패키지 | 기술 | 용도 |
+|--------|------|------|
+| `apps/admin` | Next.js 16, React 19 | Admin 웹앱 |
+| `packages/api-client` | TypeScript | API 통신 |
+| `packages/ui` | React | 공통 컴포넌트 |
+
+## 모노레포 구조
+
+### 왜 Turborepo?
+
+| 장점 | 설명 |
+|------|------|
+| **모듈 분리** | 패키지 간 명시적 의존성 |
+| **빌드 캐싱** | 변경된 패키지만 재빌드 |
+| **일관성** | 공유 설정 (ESLint, TS) |
+
+### 패키지 의존성
+
+```
+apps/admin
+├── @repo/ui          # 공통 UI
+├── @repo/api-client  # API 클라이언트
+└── next, react
+
+packages/api-client
+└── (의존성 없음 - 순수 TypeScript)
+
+packages/ui
+└── react
 ```
 
-### Develop
+## 스크립트
 
-To develop all apps and packages, run the following command:
+| 명령어 | 설명 |
+|--------|------|
+| `npm run dev` | 모든 앱 개발 서버 실행 |
+| `npm run build` | 모든 앱/패키지 빌드 |
+| `npm run lint` | 전체 린트 검사 |
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+## API 연동
 
-```sh
-cd my-turborepo
-turbo dev
+### 환경 변수 설정
+
+```bash
+# apps/admin/.env.local
+NEXT_PUBLIC_API_URL=https://api.todaygonggi.com
+NEXT_PUBLIC_API_KEY=your-api-key
 ```
 
-Without global `turbo`, use your package manager:
+### 사용 예시
 
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```typescript
+import { createApiClient } from '@repo/api-client';
+
+const api = createApiClient(process.env.NEXT_PUBLIC_API_KEY!);
+const result = await api.get('/admin/stats');
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## TODO
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- [ ] 대시보드 페이지
+- [ ] 캐시 관리 페이지
+- [ ] 로그 조회 페이지
+- [ ] 환경 변수 설정
